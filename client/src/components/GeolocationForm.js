@@ -15,6 +15,15 @@ const GeolocationForm = () => {
     }
 
     const sendLocations = async () => {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/addLocations`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                locations
+            })
+        });
     }
 
     return (
