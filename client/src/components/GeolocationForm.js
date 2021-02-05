@@ -1,7 +1,17 @@
 import React from 'react';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Tooltip, Typography } from '@material-ui/core';
 import Slider from '@material-ui/core/Slider';
-import { spacing } from '@material-ui/system';
+
+function ValueLabelComponent(props) {
+    const { children, open, value } = props;
+
+    return (
+      <Tooltip open={open} enterTouchDelay={0} placement="top" title={value}>
+        {children}
+      </Tooltip>
+    );
+}
+
 
 const GeolocationForm = () => {
     const [state, setState] = React.useState({
@@ -41,10 +51,11 @@ const GeolocationForm = () => {
                 Longitud
             </Typography>
             <Slider
+                ValueLabelComponent={ValueLabelComponent}
                 defaultValue={20}
                 value={state.longitude}
                 onChange={(event, newValue) => setState({ ...state, longitude: newValue })}
-                aria-labelledby="discrete-slider-custom"
+                aria-labelledby="input-slider"
                 max={-8.562903}
                 step={0.000001}
                 min={-8.563527}
@@ -58,6 +69,7 @@ const GeolocationForm = () => {
             Latitud
             </Typography>
             <Slider
+                ValueLabelComponent={ValueLabelComponent}
                 defaultValue={20}
                 value={state.latitude}
                 onChange={(event, newValue) => setState({ ...state, latitude: newValue })}
