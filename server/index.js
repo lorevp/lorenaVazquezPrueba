@@ -16,48 +16,47 @@ const getSitumCreds = () => ({
 
 app.use(bodyParser.json());
 app.use(cors());
+
+const session = new Date().getTime();
+
+const sendLocation = location => new Promise(resolve => {
+    setTimeout(async () => {
+        const response = await fetch(`https://${process.env.API_URL}/api/v1/realtime/positions`, {
+            headers: {
+                'Content-type': 'application/json',
+                ...getSitumCreds()
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                "outdoor_position": [
+                    {
+                        "accuracy": 0,
+                        "building_ids": [7988],
+                        "device_id": 7988,
+                        "lat": location.latitude,
+                        "lng": location.longitude,
+                        "timestamp": new Date().getTime(),
+                        "yaw": 0,
+                        "timestamp_session": session
+                    }
+                ]
+            })
+        });
+        console.log(response);
+        resolve();
+    }, 1000)
+}) 
+
+const sendLocations = async locations => {
+    for(let i = 0; i < locations.length; i++){
+        //ESTO DEBERÍA LLAMAR A UN MÉTODO QUE AGREGUE A UNA COLA PARA MANTENER SIEMPRE EL INTERVALO DE 1S
+        await sendLocation(locations[i]);
+    }
+}
  
 app.post('/addLocations', async (req, res) => {
-    const response = await fetch(`https://${process.env.API_URL}/api/v1/realtime/positions`, {
-        headers: {
-            'Content-type': 'application/json',
-            ...getSitumCreds()
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            "outdoor_position": [
-                {
-                    "accuracy": 0,
-                    "building_ids": [7988],
-                    "device_id": 7988,
-                    "lat": 42872249,
-                    "lng": -8563527,
-                    "timestamp": new Date().getTime(),
-                    "yaw": 0,
-                    "found_items": [
-                        {
-                            "id": 7988,
-                            "lat": 42872249,
-                            "lng": -8563527,
-                            "type": "BUILDING",
-                        },
-                    ],
-                    // "volatile": {
-                    //     "building_origin": 1111,
-                    //     "building_destination": 2222,
-                    //     "poi_id": 33333
-                    // },
-                    // "snr": 2.22
-                }
-            ]
-        })
-    });
-
-    console.log(response);
-
-    //const json = await response.json();
-
-    //console.log(json);
+    sendLocations(req.body.locations);
+    return res.status(200).json({ success: true });
 });
  
 app.listen(process.env.SERVER_PORT);
